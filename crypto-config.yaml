@@ -1,0 +1,33 @@
+OrdererOrgs:
+
+  - Name: Orderer
+    Domain: ordermanagement.com
+
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: Audi
+    Domain: Audi.ordermanagement.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+    Users:
+      Count: 1
+
+  - Name: MRF
+    Domain: MRF.ordermanagement.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 1
+
+  - Name: BridgeStone
+    Domain: BridgeStone.ordermanagement.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 1

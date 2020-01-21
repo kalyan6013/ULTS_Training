@@ -1,0 +1,179 @@
+Organizations:
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/ordermanagement.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+
+    - &Audi
+        Name: AudiMSP
+        ID: AudiMSP
+
+        MSPDir: crypto-config/peerOrganizations/Audi.ordermanagement.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('AudiMSP.admin', 'AudiMSP.peer', 'AudiMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('AudiMSP.admin', 'AudiMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('AudiMSP.admin')"
+        AnchorPeers:
+            - Host: peer0.Audi.ordermanagement.com
+              Port: 7051
+
+    - &MRF
+        Name: MRFMSP
+        ID: MRFMSP
+        MSPDir: crypto-config/peerOrganizations/MRF.ordermanagement.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('MRFMSP.admin', 'MRFMSP.peer', 'MRFMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('MRFMSP.admin', 'MRFMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('MRFMSP.admin')"
+        AnchorPeers:
+            - Host: peer0.MRF.ordermanagement.com
+              Port: 7051
+
+    - &BridgeStone
+        Name: BridgeStoneMSP
+        ID: BridgeStoneMSP
+        MSPDir: crypto-config/peerOrganizations/BridgeStone.ordermanagement.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('BridgeStoneMSP.admin', 'BridgeStoneMSP.peer', 'BridgeStoneMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('BridgeStoneMSP.admin', 'BridgeStoneMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('BridgeStoneMSP.admin')"
+        AnchorPeers:
+            - Host: peer0.BridgeStone.ordermanagement.com
+              Port: 7051
+
+Capabilities:
+
+    Channel: &ChannelCapabilities
+        V1_3: true
+
+    Orderer: &OrdererCapabilities
+        V1_1: true
+
+    Application: &ApplicationCapabilities
+        V1_3: true
+        V1_2: false
+        V1_1: false
+
+Application: &ApplicationDefaults
+
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+
+    OrdererType: solo
+    Addresses:
+        - orderer.ordermanagement.com:7050
+    BatchTimeout: 2s
+
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    OrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            OrderConsortium:
+                Organizations:
+                    - *Audi
+                    - *MRF
+                    - *BridgeStone
+
+    AudiMRFChannel:
+        Consortium: OrderConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Audi
+                - *MRF
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+    AudiBridgeStoneChannel:
+        Consortium: OrderConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Audi
+                - *BridgeStone
+            Capabilities:
+                <<: *ApplicationCapabilities

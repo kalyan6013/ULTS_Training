@@ -1,0 +1,43 @@
+1. Run the Cryptogen tool which generates the required certificates and other:
+
+ ./bin/cryptogen generate --config=./crypto-config.yaml
+
+2. We need to tell the configtxgen tool where to look for the configtx.yaml file that it needs to ingest. We will tell it look in our present working directory:
+
+export FABRIC_CFG_PATH=$PWD
+
+3. Invoke the configtxgen tool to create the ordered genesis block:
+
+./bin/configtxgen -profile OrdererGenesis -channelID ordererchannel -outputBlock ./channel-artifacts/genesis.block
+
+4. We need to create the channel transaction artifact. Channel name should be exported to environment variable or need to specify in this manual:
+
+For AudiMRF Channel:
+
+./bin/configtxgen -profile AudiMRFChannel -outputCreateChannelTx ./channel-artifacts/AudiMRFchannel.tx -channelID AudiMRFChannel
+
+For AudiBridgeStone
+
+./bin/configtxgen -profile AudiBridgeStoneChannel -outputCreateChannelTx ./channel-artifacts/AudiBridgeStonechannel.tx -channelID AudiBridgeStoneChannel
+
+5. We define anchor peer for Audi:
+
+Anchor Peer for AudiMRF communication:
+
+./bin/configtxgen -profile AudiMRFChannel -outputAnchorPeersUpdate ./channel-artifacts/AudiMRFMSPanchors.tx -channelID AudiMRFChannel -asOrg AudiMSP
+
+Anchor Peer for AudiBridgeStone communication:
+
+./bin/configtxgen -profile AudiBridgeStoneChannel -outputAnchorPeersUpdate ./channel-artifacts/AudiBridgeStoneMSPanchors.tx -channelID AudiBridgeStoneChannel -asOrg AudiMSP
+
+6. We define anchor peer for MRF:
+
+./bin/configtxgen -profile AudiMRFChannel -outputAnchorPeersUpdate ./channel-artifacts/MRFAudiMSPanchors.tx -channelID AudiMRFChannel -asOrg MRFMSP
+
+7. We define anchor peer for BridgeStone:
+
+./bin/configtxgen -profile AudiBridgeStoneChannel -outputAnchorPeersUpdate ./channel-artifacts/BridgeStoneAudiMSPanchors.tx -channelID AudiBridgeStoneChannel -asOrg BridgeStoneMSP
+
+8. We start the network:
+
+docker-compose -f docker-compose-cli.yaml up -d
