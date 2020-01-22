@@ -41,3 +41,18 @@ Anchor Peer for AudiBridgeStone communication:
 8. We start the network:
 
 docker-compose -f docker-compose-cli.yaml up -d
+
+9. Enter into the CLI Container:
+
+docker exec -it cli bash
+
+10. Export the environment variables for the Peer0 Org1:
+
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Audi.ordermanagement.com/users/Admin@Audi.ordermanagement.com/msp
+export CORE_PEER_ADDRESS=peer0.Audi.ordermanagement.com:7051
+export CORE_PEER_LOCALMSPID="AudiMSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Audi.ordermanagement.com/peers/peer0.Audi.ordermanagement.com/tls/ca.crt
+
+11. Create a channel:
+
+peer channel create -o orderer.ordermanagement.com:7050 -c AudiMRFChannel -f ./channel-artifacts/AudiMRFchannel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/ordermanagement.com/orderers/orderer.ordermanagement.com/msp/tlscacerts/tlsca.ordermanagement.com-cert.pem
